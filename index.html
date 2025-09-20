@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Quiz Game</title>
+    <title>Math Challenge Game</title>
     <style>
         :root {
             --primary: #4361ee;
@@ -15,6 +15,8 @@
             --danger: #f72585;
             --warning: #f8961e;
             --info: #43aa8b;
+            --light-theme-bg: #ffffff;
+            --light-theme-text: #333333;
         }
 
         * {
@@ -32,6 +34,12 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-theme {
+            background: var(--light-theme-bg);
+            color: var(--light-theme-text);
         }
 
         .container {
@@ -40,11 +48,16 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
             padding: 30px;
             text-align: center;
             animation: fadeIn 0.5s ease;
             overflow: hidden;
+        }
+
+        body.light-theme .container {
+            background-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes fadeIn {
@@ -57,6 +70,11 @@
             margin-bottom: 20px;
             font-size: 2.5rem;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-theme h1 {
+            color: var(--secondary);
+            text-shadow: none;
         }
 
         .btn {
@@ -79,19 +97,32 @@
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
 
+        .btn:focus {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         .btn:active {
             transform: translateY(0);
         }
 
-        .btn-restart {
+        .btn-restart, .btn-pause, .btn-hint, .btn-quit, .btn-skip {
             background-color: var(--info);
         }
 
-        .btn-restart:hover {
+        .btn-restart:hover, .btn-pause:hover, .btn-hint:hover, .btn-quit:hover, .btn-skip:hover {
             background-color: #3a8c7d;
         }
 
-        .rules-container {
+        .btn-theme {
+            background-color: var(--warning);
+        }
+
+        .btn-theme:hover {
+            background-color: #e07b00;
+        }
+
+        .rules-container, .leaderboard-container, .how-to-play-container {
             text-align: left;
             margin: 20px 0;
             padding: 20px;
@@ -100,21 +131,35 @@
             animation: slideIn 0.5s ease;
         }
 
+        body.light-theme .rules-container, body.light-theme .leaderboard-container, body.light-theme .how-to-play-container {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
-        .rules-container h2 {
+        .rules-container h2, .leaderboard-container h2, .how-to-play-container h2 {
             color: var(--accent);
             margin-bottom: 10px;
+            cursor: pointer;
         }
 
-        .rules-container ul {
+        body.light-theme .rules-container h2, body.light-theme .leaderboard-container h2, body.light-theme .how-to-play-container h2 {
+            color: var(--secondary);
+        }
+
+        .rules-container ul, .leaderboard-container ul, .how-to-play-container ul {
             padding-left: 20px;
+            display: none;
         }
 
-        .rules-container li {
+        .rules-container ul.show, .how-to-play-container ul.show {
+            display: block;
+        }
+
+        .rules-container li, .leaderboard-container li, .how-to-play-container li {
             margin-bottom: 8px;
         }
 
@@ -131,7 +176,11 @@
             border-radius: 50px;
         }
 
-        .timer, .score {
+        body.light-theme .timer-container {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .timer, .score, .question-counter, .streak {
             font-weight: bold;
             font-size: 1.2rem;
         }
@@ -144,12 +193,24 @@
             color: var(--success);
         }
 
+        .question-counter {
+            color: var(--info);
+        }
+
+        .streak {
+            color: #f4a261;
+        }
+
         .question-container {
             background-color: rgba(255, 255, 255, 0.1);
             padding: 25px;
             border-radius: 10px;
             margin-bottom: 20px;
             animation: pulse 1s infinite alternate;
+        }
+
+        body.light-theme .question-container {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         @keyframes pulse {
@@ -161,6 +222,10 @@
             font-size: 1.8rem;
             margin-bottom: 20px;
             color: white;
+        }
+
+        body.light-theme .question {
+            color: var(--dark);
         }
 
         .options {
@@ -180,7 +245,12 @@
             font-size: 1.2rem;
         }
 
-        .option:hover {
+        body.light-theme .option {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-color: var(--secondary);
+        }
+
+        .option:hover, .option:focus {
             background-color: var(--primary);
             transform: scale(1.05);
         }
@@ -198,6 +268,13 @@
         .option.incorrect {
             background-color: var(--danger);
             border-color: var(--danger);
+        }
+
+        .option.hint-disabled {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--dark);
+            color: var(--dark);
+            cursor: not-allowed;
         }
 
         .feedback {
@@ -230,6 +307,10 @@
             overflow: hidden;
         }
 
+        body.light-theme .progress-container {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--accent));
@@ -237,7 +318,7 @@
             transition: width 0.3s ease;
         }
 
-        .result-container {
+        .result-container, .pause-container {
             display: none;
             animation: zoomIn 0.5s ease;
         }
@@ -247,12 +328,12 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .result-container h2 {
+        .result-container h2, .pause-container h2 {
             font-size: 2rem;
             margin-bottom: 20px;
         }
 
-        .result-container p {
+        .result-container p, .pause-container p {
             font-size: 1.2rem;
             margin-bottom: 20px;
         }
@@ -281,124 +362,284 @@
             .container {
                 padding: 20px;
             }
-            
+
             h1 {
                 font-size: 2rem;
             }
-            
+
             .options {
                 grid-template-columns: 1fr;
             }
-            
+
             .question {
                 font-size: 1.5rem;
             }
         }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Math Quiz Game</h1>
-        
+    <div class="container" role="main" aria-label="Math Challenge Main Content">
+        <h1>Math Challenge</h1>
+
         <div class="start-container">
-            <button id="startBtn" class="btn">Start Game</button>
+            <label for="level">Level:</label>
+            <select id="level" aria-label="Select game level">
+                <option value="easy">Beginner</option>
+                <option value="medium">Intermediate</option>
+                <option value="hard">Advanced</option>
+            </select>
+            <button id="beginBtn" class="btn" aria-label="Begin game">Begin Game</button>
+            <button id="themeBtn" class="btn btn-theme" aria-label="Toggle theme">Theme</button>
+            <button id="scoresBtn" class="btn" aria-label="View scores">Scores</button>
         </div>
-        
-        <div id="rulesContainer" class="rules-container" style="display: none;">
-            <h2>Game Rules</h2>
-            <ul>
-                <li>You have <strong>10 minutes</strong> to answer <strong>10 math questions</strong></li>
-                <li>Each question has <strong>three answer choices (A, B, C)</strong></li>
-                <li>You have <strong>50 seconds per question</strong> to select an answer</li>
-                <li>Correct answer earns you <strong>5 points</strong></li>
-                <li>Score <strong>7 or more correct answers</strong> to win</li>
+
+        <div id="howToPlay" class="how-to-play-container" role="region" aria-label="How to Play">
+            <h2 id="howToPlayToggle" aria-expanded="false">How to Play</h2>
+            <ul id="howToPlayList">
+                <li>Answer 10 math questions within the time limit.</li>
+                <li>Choose from three answer options (A, B, C).</li>
+                <li>Each question has a 30-second time limit.</li>
+                <li>Earn 5 points per correct answer, plus a time bonus.</li>
+                <li>Score at least 6 correct answers to win.</li>
+                <li>Use hints to remove one incorrect option (once per question).</li>
+                <li>Skip up to 3 questions per game.</li>
+                <li>Use keys 1, 2, 3 or A, B, C to select answers, S to skip, Q to quit.</li>
+                <li>Tab to navigate, Enter/Space to select.</li>
             </ul>
-            <button id="continueBtn" class="btn">Continue</button>
         </div>
-        
-        <div id="gameContainer" class="game-container">
+
+        <div id="rules" class="rules-container" style="display: none;" role="region" aria-label="Game Rules">
+            <h2>Rules</h2>
+            <ul class="show">
+                <li>Answer 10 math questions in the allotted time.</li>
+                <li>Three answer choices (A, B, C).</li>
+                <li>30 seconds per question.</li>
+                <li>Correct answer: +5 points + time bonus.</li>
+                <li>At least 6 correct answers to win.</li>
+                <li>Hint removes one wrong option (once per question).</li>
+                <li>Up to 3 skips allowed.</li>
+                <li>Use 1, 2, 3 or A, B, C to select answers, S to skip, Q to quit.</li>
+            </ul>
+            <button id="proceedBtn" class="btn" aria-label="Proceed to game">Proceed to Game</button>
+        </div>
+
+        <div id="scores" class="leaderboard-container" style="display: none;" role="region" aria-label="High Scores">
+            <h2>High Scores</h2>
+            <ul id="scoresList" aria-label="High scores list"></ul>
+            <button id="backBtn" class="btn" aria-label="Back to start">Back</button>
+        </div>
+
+        <div id="game" class="game-container" style="display: none;" role="region" aria-label="Game Interface">
             <div class="timer-container">
-                <div class="timer">Time: <span id="timeRemaining">10:00</span></div>
-                <div class="score">Score: <span id="currentScore">0</span></div>
+                <div class="timer" aria-live="polite">Time: <span id="timeLeft"></span></div>
+                <div class="question-counter" aria-live="polite">Question: <span id="qCounter">1 of 10</span></div>
+                <div class="score" aria-live="polite">Score: <span id="score">0</span></div>
+                <div class="streak" aria-live="polite">Streak: <span id="streakCounter">0</span></div>
             </div>
-            
+
             <div class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
+                <div id="progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            
-            <div id="questionContainer" class="question-container">
-                <div id="question" class="question"></div>
-                <div id="options" class="options"></div>
+
+            <div id="questionBox" class="question-container">
+                <div id="question" class="question" aria-live="polite"></div>
+                <div id="options" class="options" role="radiogroup" aria-label="Answer options"></div>
             </div>
-            
-            <div id="feedback" class="feedback"></div>
-            
-            <button id="nextBtn" class="btn" style="display: none;">Next Question</button>
+
+            <div id="feedback" class="feedback" aria-live="assertive"></div>
+
+            <div class="game-controls">
+                <button id="hintBtn" class="btn btn-hint" aria-label="Use hint">Hint</button>
+                <button id="pauseBtn" class="btn btn-pause" aria-label="Pause game">Pause</button>
+                <button id="quitBtn" class="btn btn-quit" aria-label="Quit game">Quit</button>
+                <button id="skipBtn" class="btn btn-skip" aria-label="Skip question">Skip</button>
+            </div>
         </div>
-        
-        <div id="resultContainer" class="result-container">
+
+        <div id="pauseMenu" class="pause-container" style="display: none;" role="dialog" aria-label="Pause Menu">
+            <h2>Paused</h2>
+            <p>Resume or save progress.</p>
+            <button id="resumeBtn" class="btn" aria-label="Resume game">Resume</button>
+            <button id="saveBtn" class="btn" aria-label="Save progress">Save</button>
+            <button id="exitBtn" class="btn" aria-label="Exit to start">Exit</button>
+        </div>
+
+        <div id="results" class="result-container" style="display: none;" role="dialog" aria-label="Game Results">
             <h2 id="resultTitle"></h2>
-            <p id="resultMessage"></p>
-            <p>Your final score: <span id="finalScore">0</span></p>
-            <button id="restartBtn" class="btn btn-restart">Restart Game</button>
+            <p id="resultMsg"></p>
+            <p>Score: <span id="finalScore">0</span></p>
+            <button id="restartBtn" class="btn btn-restart" aria-label="Restart game">Restart</button>
         </div>
     </div>
 
-    <audio id="backgroundMusic" loop>
-        <source src="https://drive.google.com/uc?export=download&id=1xlnP_PpSFf8nHEJK9qJRzY7KEV0QSw5b" type="audio/mpeg">
+    <audio id="quizSfx" loop preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/quiz.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="correctSfx" preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/correct.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="incorrectSfx" preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/incorrect.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="winSfx" preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/won.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="loseSfx" preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/lose.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="skipSfx" preload="auto">
+        <source src="https://s-toolkit.github.io/math-challenge-game/sounds/skip.mp3" type="audio/mpeg">
     </audio>
 
     <script>
         // DOM Elements
-        const startBtn = document.getElementById('startBtn');
-        const continueBtn = document.getElementById('continueBtn');
+        const beginBtn = document.getElementById('beginBtn');
+        const proceedBtn = document.getElementById('proceedBtn');
         const restartBtn = document.getElementById('restartBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const rulesContainer = document.getElementById('rulesContainer');
-        const gameContainer = document.getElementById('gameContainer');
+        const hintBtn = document.getElementById('hintBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const quitBtn = document.getElementById('quitBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const exitBtn = document.getElementById('exitBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const scoresBtn = document.getElementById('scoresBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const backBtn = document.getElementById('backBtn');
+        const rules = document.getElementById('rules');
+        const game = document.getElementById('game');
         const startContainer = document.querySelector('.start-container');
-        const resultContainer = document.getElementById('resultContainer');
-        const questionElement = document.getElementById('question');
-        const optionsElement = document.getElementById('options');
-        const feedbackElement = document.getElementById('feedback');
-        const timeRemainingElement = document.getElementById('timeRemaining');
-        const currentScoreElement = document.getElementById('currentScore');
-        const finalScoreElement = document.getElementById('finalScore');
-        const resultTitleElement = document.getElementById('resultTitle');
-        const resultMessageElement = document.getElementById('resultMessage');
-        const progressBar = document.getElementById('progressBar');
-        const backgroundMusic = document.getElementById('backgroundMusic');
+        const results = document.getElementById('results');
+        const pauseMenu = document.getElementById('pauseMenu');
+        const scores = document.getElementById('scores');
+        const question = document.getElementById('question');
+        const options = document.getElementById('options');
+        const feedback = document.getElementById('feedback');
+        const timeLeft = document.getElementById('timeLeft');
+        const score = document.getElementById('score');
+        const finalScore = document.getElementById('finalScore');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultMsg = document.getElementById('resultMsg');
+        const qCounter = document.getElementById('qCounter');
+        const progress = document.getElementById('progress');
+        const level = document.getElementById('level');
+        const scoresList = document.getElementById('scoresList');
+        const streakCounter = document.getElementById('streakCounter');
+        const howToPlay = document.getElementById('howToPlay');
+        const howToPlayToggle = document.getElementById('howToPlayToggle');
+        const howToPlayList = document.getElementById('howToPlayList');
+        const quizSfx = document.getElementById('quizSfx');
+        const correctSfx = document.getElementById('correctSfx');
+        const incorrectSfx = document.getElementById('incorrectSfx');
+        const winSfx = document.getElementById('winSfx');
+        const loseSfx = document.getElementById('loseSfx');
+        const skipSfx = document.getElementById('skipSfx');
 
         // Game Variables
         let questions = [];
         let currentQuestionIndex = 0;
-        let score = 0;
+        let scoreVal = 0;
+        let streak = 0;
         let timer;
         let questionTimer;
-        let totalTime = 600; // 10 minutes in seconds
-        let questionTime = 50; // 50 seconds per question
+        let totalTime = 300; // Default to 5 minutes for easy
+        let questionTime = 30; // 30 seconds per question
+        let gameLevel = 'easy';
+        let hintsUsed = 0;
+        let skipsUsed = 0;
+        let isPaused = false;
+        let highScores = JSON.parse(localStorage.getItem('scores')) || [];
+        let scoresByLevel = { easy: [], medium: [], hard: [] };
+        let questionHistory = [];
+        let timeBonus = 0;
+        let answeredCorrectly = [];
+
+        // Correct answers array for randomization
+        const correctAnswers = ['A', 'C', 'A', 'B', 'B', 'C', 'B', 'A', 'C', 'B'];
 
         // Event Listeners
-        startBtn.addEventListener('click', showRules);
-        continueBtn.addEventListener('click', startGame);
-        nextBtn.addEventListener('click', nextQuestion);
+        beginBtn.addEventListener('click', showRules);
+        proceedBtn.addEventListener('click', startGame);
         restartBtn.addEventListener('click', restartGame);
+        hintBtn.addEventListener('click', useHint);
+        pauseBtn.addEventListener('click', pauseGame);
+        quitBtn.addEventListener('click', quitGame);
+        resumeBtn.addEventListener('click', resumeGame);
+        saveBtn.addEventListener('click', saveProgress);
+        exitBtn.addEventListener('click', exitGame);
+        themeBtn.addEventListener('click', toggleTheme);
+        scoresBtn.addEventListener('click', showScores);
+        skipBtn.addEventListener('click', skipQuestion);
+        backBtn.addEventListener('click', () => {
+            scores.style.display = 'none';
+            startContainer.style.display = 'block';
+            howToPlay.style.display = 'block';
+            beginBtn.focus();
+        });
+        howToPlayToggle.addEventListener('click', toggleHowToPlay);
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (game.style.display === 'block' && !isPaused) {
+                if (e.key === '1' || e.key === 'a' || e.key === 'A') selectOptionByKey('A');
+                if (e.key === '2' || e.key === 'b' || e.key === 'B') selectOptionByKey('B');
+                if (e.key === '3' || e.key === 'c' || e.key === 'C') selectOptionByKey('C');
+                if (e.key === 's' || e.key === 'S') skipQuestion();
+                if (e.key === 'q' || e.key === 'Q') quitGame();
+            }
+        });
 
         // Functions
+        function toggleHowToPlay() {
+            if (game.style.display !== 'block') {
+                howToPlayList.classList.toggle('show');
+                howToPlayToggle.setAttribute('aria-expanded', howToPlayList.classList.contains('show'));
+            }
+        }
+
         function showRules() {
             startContainer.style.display = 'none';
-            rulesContainer.style.display = 'block';
+            howToPlay.style.display = 'none';
+            rules.style.display = 'block';
+            gameLevel = level.value;
+            totalTime = gameLevel === 'easy' ? 300 : gameLevel === 'medium' ? 180 : 120;
+            proceedBtn.focus();
         }
 
         function startGame() {
-            rulesContainer.style.display = 'none';
-            gameContainer.style.display = 'block';
-            
-            // Start background music
-            backgroundMusic.play().catch(e => console.log("Auto-play prevented:", e));
-            
-            // Initialize game
-            generateQuestions();
+            rules.style.display = 'none';
+            game.style.display = 'block';
+            const savedProgress = JSON.parse(localStorage.getItem('mathChallengeProgress'));
+            if (savedProgress) {
+                questions = savedProgress.questions;
+                currentQuestionIndex = savedProgress.currentQuestionIndex;
+                scoreVal = savedProgress.score;
+                totalTime = savedProgress.totalTime;
+                hintsUsed = savedProgress.hintsUsed;
+                skipsUsed = savedProgress.skipsUsed;
+                streak = savedProgress.streak;
+                questionHistory = savedProgress.questionHistory;
+                timeBonus = savedProgress.timeBonus;
+                answeredCorrectly = savedProgress.answeredCorrectly;
+                score.textContent = scoreVal;
+                streakCounter.textContent = streak;
+                qCounter.textContent = `${currentQuestionIndex + 1} of 10`;
+            } else {
+                generateQuestions();
+            }
+            quizSfx.volume = 0.05;
+            quizSfx.play().catch(e => console.error("Quiz sound error:", e));
             startTimer();
             showQuestion();
         }
@@ -406,11 +647,9 @@
         function generateQuestions() {
             questions = [];
             const usedQuestions = new Set();
-            
             while (questions.length < 10) {
-                const question = generateRandomQuestion();
+                const question = generateQuestionByLevel();
                 const questionKey = `${question.question}-${question.options.join('-')}`;
-                
                 if (!usedQuestions.has(questionKey)) {
                     questions.push(question);
                     usedQuestions.add(questionKey);
@@ -418,195 +657,373 @@
             }
         }
 
-        function generateRandomQuestion() {
-            const operations = ['+', '-', '*', '/'];
-            const operation = operations[Math.floor(Math.random() * operations.length)];
-            
-            let num1, num2, answer;
-            
-            switch (operation) {
-                case '+':
+        function generateQuestionByLevel() {
+            let questionTypes, num1, num2, answer, questionText, options;
+
+            switch (gameLevel) {
+                case 'easy':
+                    questionTypes = ['addition', 'subtraction', 'multiplication', 'division', 'square'];
+                    break;
+                case 'medium':
+                    questionTypes = ['addition', 'subtraction', 'multiplication', 'division', 'square', 'squareRoot'];
+                    break;
+                case 'hard':
+                    questionTypes = ['exponent', 'fraction', 'linear', 'geometry'];
+                    break;
+            }
+
+            const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+
+            switch (type) {
+                case 'addition':
                     num1 = Math.floor(Math.random() * 50) + 1;
                     num2 = Math.floor(Math.random() * 50) + 1;
                     answer = num1 + num2;
+                    questionText = `${num1} + ${num2} = ?`;
                     break;
-                case '-':
-                    num1 = Math.floor(Math.random() * 50) + 1;
+                case 'subtraction':
+                    num1 = Math.floor(Math.random() * 100) + 1;
                     num2 = Math.floor(Math.random() * num1) + 1;
                     answer = num1 - num2;
+                    questionText = `${num1} - ${num2} = ?`;
                     break;
-                case '*':
-                    num1 = Math.floor(Math.random() * 12) + 1;
-                    num2 = Math.floor(Math.random() * 12) + 1;
+                case 'multiplication':
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
                     answer = num1 * num2;
+                    questionText = `${num1} × ${num2} = ?`;
                     break;
-                case '/':
+                case 'division':
                     num2 = Math.floor(Math.random() * 10) + 1;
                     answer = Math.floor(Math.random() * 10) + 1;
                     num1 = num2 * answer;
+                    questionText = `${num1} ÷ ${num2} = ?`;
+                    break;
+                case 'square':
+                    num1 = Math.floor(Math.random() * (gameLevel === 'easy' ? 10 : 15)) + 1;
+                    answer = num1 * num1;
+                    questionText = `${num1}² = ?`;
+                    break;
+                case 'squareRoot':
+                    num1 = Math.floor(Math.random() * (gameLevel === 'medium' ? 100 : 144)) + 1;
+                    answer = Math.floor(Math.sqrt(num1));
+                    num1 = answer * answer;
+                    answer = Math.round(Math.sqrt(num1) * 100) / 100;
+                    questionText = `√${num1} = ?`;
+                    break;
+                case 'exponent':
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 4) + 1;
+                    answer = Math.pow(num1, num2);
+                    questionText = `${num1}^${num2} = ?`;
+                    break;
+                case 'fraction':
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    const denom1 = Math.floor(Math.random() * 10) + 1;
+                    const denom2 = Math.floor(Math.random() * 10) + 1;
+                    answer = (num1 / denom1) + (num2 / denom2);
+                    answer = Math.round(answer * 100) / 100;
+                    questionText = `(${num1}/${denom1}) + (${num2}/${denom2}) = ?`;
+                    break;
+                case 'linear':
+                    const a = Math.floor(Math.random() * 10) + 1;
+                    const b = Math.floor(Math.random() * 20) * (Math.random() < 0.5 ? 1 : -1);
+                    const c = Math.floor(Math.random() * 20) * (Math.random() < 0.5 ? 1 : -1);
+                    answer = (c - b) / a;
+                    answer = Math.round(answer * 100) / 100;
+                    questionText = `${a}x + ${b} = ${c}, x = ?`;
+                    break;
+                case 'geometry':
+                    const shape = Math.random() < 0.5 ? 'circle' : 'rectangle';
+                    if (shape === 'circle') {
+                        const radius = Math.floor(Math.random() * 10) + 1;
+                        answer = Math.PI * radius * radius;
+                        answer = Math.round(answer * 100) / 100;
+                        questionText = `Area of circle with radius ${radius} = ?`;
+                    } else {
+                        const l = Math.floor(Math.random() * 20) + 1;
+                        const w = Math.floor(Math.random() * 20) + 1;
+                        answer = l * w;
+                        questionText = `Area of rectangle ${l} × ${w} = ?`;
+                    }
                     break;
             }
-            
-            const questionText = `${num1} ${operation} ${num2} = ?`;
-            
-            // Generate options with the correct answer and two wrong answers
-            const options = [answer];
+
+            options = [answer];
             while (options.length < 3) {
                 let wrongAnswer;
                 do {
-                    wrongAnswer = answer + (Math.floor(Math.random() * 10) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                    // Ensure wrong answer is positive for division
-                    if (operation === '/' && wrongAnswer <= 0) {
-                        wrongAnswer = answer + Math.floor(Math.random() * 5) + 1;
-                    }
-                } while (options.includes(wrongAnswer) || wrongAnswer === answer);
+                    wrongAnswer = answer + (Math.floor(Math.random() * 50) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                    wrongAnswer = Math.round(wrongAnswer * 100) / 100;
+                } while (options.includes(wrongAnswer) || wrongAnswer === answer || (wrongAnswer < 0 && type !== 'linear' && type !== 'subtraction'));
                 options.push(wrongAnswer);
             }
-            
-            // Shuffle options
-            for (let i = options.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [options[i], options[j]] = [options[j], options[i]];
-            }
-            
-            const correctOption = String.fromCharCode(65 + options.indexOf(answer));
-            
+
+            options.sort(() => Math.random() - 0.5);
+            const correctOption = correctAnswers[questions.length] || String.fromCharCode(65 + options.indexOf(answer));
+
             return {
                 question: questionText,
                 options: options,
-                correctAnswer: correctOption
+                correctAnswer: correctOption,
+                type: type
             };
         }
 
         function showQuestion() {
-            if (currentQuestionIndex >= questions.length) {
+            if (currentQuestionIndex >= 10) {
                 endGame();
                 return;
             }
-            
-            // Update progress bar
-            progressBar.style.width = `${(currentQuestionIndex / questions.length) * 100}%`;
-            
+
+            progress.style.width = `${(currentQuestionIndex / 10) * 100}%`;
+            progress.setAttribute('aria-valuenow', (currentQuestionIndex / 10) * 100);
+            qCounter.textContent = `${currentQuestionIndex + 1} of 10`;
+
             const currentQuestion = questions[currentQuestionIndex];
-            questionElement.textContent = currentQuestion.question;
-            
-            optionsElement.innerHTML = '';
+            question.textContent = currentQuestion.question;
+            options.innerHTML = '';
             currentQuestion.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.classList.add('option');
                 optionElement.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
                 optionElement.dataset.option = String.fromCharCode(65 + index);
+                optionElement.setAttribute('role', 'radio');
+                optionElement.setAttribute('aria-checked', 'false');
+                optionElement.setAttribute('aria-label', `Option ${String.fromCharCode(65 + index)}: ${option}`);
+                optionElement.tabIndex = 0;
                 optionElement.addEventListener('click', selectOption);
-                optionsElement.appendChild(optionElement);
+                optionElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectOption(e);
+                    }
+                });
+                options.appendChild(optionElement);
             });
-            
-            feedbackElement.style.display = 'none';
-            nextBtn.style.display = 'none';
-            
-            // Start question timer
+
+            feedback.style.display = 'none';
+            hintBtn.disabled = hintsUsed >= currentQuestionIndex + 1;
+            skipBtn.disabled = skipsUsed >= 3;
             startQuestionTimer();
+            options.querySelector('.option').focus();
         }
 
         function startTimer() {
+            clearInterval(timer);
             timer = setInterval(() => {
-                totalTime--;
-                updateTimeDisplay();
-                
-                if (totalTime <= 0) {
-                    clearInterval(timer);
-                    endGame();
+                if (!isPaused) {
+                    totalTime--;
+                    updateTimeDisplay();
+                    if (totalTime <= 0) {
+                        clearInterval(timer);
+                        endGame();
+                    }
                 }
             }, 1000);
         }
 
         function startQuestionTimer() {
             if (questionTimer) clearInterval(questionTimer);
-            
             let remainingTime = questionTime;
             updateQuestionTimerDisplay(remainingTime);
-            
             questionTimer = setInterval(() => {
-                remainingTime--;
-                updateQuestionTimerDisplay(remainingTime);
-                
-                if (remainingTime <= 0) {
-                    clearInterval(questionTimer);
-                    handleTimeOut();
+                if (!isPaused) {
+                    remainingTime--;
+                    updateQuestionTimerDisplay(remainingTime);
+                    if (remainingTime <= 0) {
+                        clearInterval(questionTimer);
+                        handleTimeOut();
+                    }
                 }
             }, 1000);
         }
 
         function updateQuestionTimerDisplay(seconds) {
-            const questionTimerElement = document.querySelector('.question-container');
+            const questionBox = document.querySelector('.question-container');
             const percentage = (seconds / questionTime) * 100;
-            
-            // Change color based on remaining time
+            timeBonus = Math.floor(seconds / 10);
             if (percentage < 20) {
-                questionTimerElement.style.animation = 'pulse 0.5s infinite alternate';
-                questionTimerElement.style.border = '2px solid var(--danger)';
+                questionBox.style.animation = 'pulse 0.5s infinite alternate';
+                questionBox.style.border = '2px solid var(--danger)';
             } else if (percentage < 50) {
-                questionTimerElement.style.animation = 'pulse 1s infinite alternate';
-                questionTimerElement.style.border = '2px solid var(--warning)';
+                questionBox.style.animation = 'pulse 1s infinite alternate';
+                questionBox.style.border = '2px solid var(--warning)';
             } else {
-                questionTimerElement.style.animation = 'pulse 1.5s infinite alternate';
-                questionTimerElement.style.border = '2px solid var(--primary)';
+                questionBox.style.animation = 'pulse 1.5s infinite alternate';
+                questionBox.style.border = '2px solid var(--primary)';
             }
         }
 
         function updateTimeDisplay() {
             const minutes = Math.floor(totalTime / 60);
             const seconds = totalTime % 60;
-            timeRemainingElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timeLeft.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         function selectOption(e) {
             const selectedOption = e.target.dataset.option;
             const currentQuestion = questions[currentQuestionIndex];
-            
-            // Disable all options
             document.querySelectorAll('.option').forEach(option => {
                 option.style.pointerEvents = 'none';
+                option.setAttribute('aria-checked', 'false');
             });
-            
-            // Highlight selected option
             e.target.classList.add('selected');
-            
-            // Check if answer is correct
+            e.target.setAttribute('aria-checked', 'true');
+            questionHistory.push({
+                question: currentQuestion.question,
+                selected: selectedOption,
+                correct: currentQuestion.correctAnswer
+            });
+
             if (selectedOption === currentQuestion.correctAnswer) {
                 e.target.classList.add('correct');
-                score += 5;
-                currentScoreElement.textContent = score;
-                showFeedback('Correct! You earned 5 points.', 'correct');
+                scoreVal += 5 + timeBonus;
+                streak++;
+                answeredCorrectly[currentQuestionIndex] = true;
+                score.textContent = scoreVal;
+                streakCounter.textContent = streak;
+                showFeedback(`Correct! +${5 + timeBonus} points.`, 'correct');
+                correctSfx.play().catch(e => console.error("Correct sound error:", e));
             } else {
                 e.target.classList.add('incorrect');
-                // Highlight correct answer
                 document.querySelector(`.option[data-option="${currentQuestion.correctAnswer}"]`).classList.add('correct');
-                showFeedback('Wrong answer! Try again.', 'incorrect');
+                streak = 0;
+                answeredCorrectly[currentQuestionIndex] = false;
+                streakCounter.textContent = streak;
+                showFeedback(`Wrong! Correct answer: ${currentQuestion.correctAnswer}.`, 'incorrect');
+                incorrectSfx.play().catch(e => console.error("Incorrect sound error:", e));
             }
-            
+
             clearInterval(questionTimer);
-            nextBtn.style.display = 'block';
+            setTimeout(nextQuestion, 2000);
+        }
+
+        function selectOptionByKey(option) {
+            const optionElement = document.querySelector(`.option[data-option="${option}"]`);
+            if (optionElement && optionElement.style.pointerEvents !== 'none') {
+                optionElement.click();
+            }
+        }
+
+        function useHint() {
+            if (hintsUsed < currentQuestionIndex + 1) {
+                const currentQuestion = questions[currentQuestionIndex];
+                const incorrectOptions = Array.from(options.querySelectorAll('.option:not([data-option="' + currentQuestion.correctAnswer + '"])'));
+                if (incorrectOptions.length > 0) {
+                    const randomIncorrect = incorrectOptions[Math.floor(Math.random() * incorrectOptions.length)];
+                    randomIncorrect.classList.add('hint-disabled');
+                    randomIncorrect.style.pointerEvents = 'none';
+                    randomIncorrect.setAttribute('aria-disabled', 'true');
+                    hintsUsed++;
+                    hintBtn.disabled = true;
+                    showFeedback('One incorrect option disabled.', 'info');
+                }
+            }
+        }
+
+        function skipQuestion() {
+            if (skipsUsed < 3) {
+                skipsUsed++;
+                skipSfx.play().catch(e => console.error("Skip sound error:", e));
+                showFeedback('Question skipped.', 'info');
+                skipBtn.disabled = skipsUsed >= 3;
+                questionHistory.push({
+                    question: questions[currentQuestionIndex].question,
+                    selected: 'Skipped',
+                    correct: questions[currentQuestionIndex].correctAnswer
+                });
+                answeredCorrectly[currentQuestionIndex] = false;
+                streak = 0;
+                streakCounter.textContent = streak;
+                nextQuestion();
+            }
+        }
+
+        function quitGame() {
+            clearInterval(timer);
+            clearInterval(questionTimer);
+            quizSfx.pause();
+            quizSfx.currentTime = 0;
+            game.style.display = 'none';
+            startContainer.style.display = 'block';
+            howToPlay.style.display = 'block';
+            isPaused = false;
+            localStorage.removeItem('mathChallengeProgress');
+            beginBtn.focus();
         }
 
         function handleTimeOut() {
             const currentQuestion = questions[currentQuestionIndex];
-            
-            // Disable all options
             document.querySelectorAll('.option').forEach(option => {
                 option.style.pointerEvents = 'none';
                 if (option.dataset.option === currentQuestion.correctAnswer) {
                     option.classList.add('correct');
                 }
             });
-            
-            showFeedback('Time out! The correct answer was highlighted.', 'incorrect');
-            nextBtn.style.display = 'block';
+            showFeedback(`Time out! Correct answer: ${currentQuestion.correctAnswer}.`, 'incorrect');
+            incorrectSfx.play().catch(e => console.error("Incorrect sound error:", e));
+            questionHistory.push({
+                question: currentQuestion.question,
+                selected: 'Timed out',
+                correct: currentQuestion.correctAnswer
+            });
+            answeredCorrectly[currentQuestionIndex] = false;
+            streak = 0;
+            streakCounter.textContent = streak;
+            setTimeout(nextQuestion, 2000);
         }
 
         function showFeedback(message, type) {
-            feedbackElement.textContent = message;
-            feedbackElement.className = `feedback ${type}`;
-            feedbackElement.style.display = 'block';
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+        }
+
+        function pauseGame() {
+            isPaused = true;
+            game.style.display = 'none';
+            pauseMenu.style.display = 'block';
+            quizSfx.pause();
+            resumeBtn.focus();
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            pauseMenu.style.display = 'none';
+            game.style.display = 'block';
+            quizSfx.play().catch(e => console.error("Resume sound error:", e));
+            options.querySelector('.option').focus();
+        }
+
+        function saveProgress() {
+            const progress = {
+                questions,
+                currentQuestionIndex,
+                score: scoreVal,
+                totalTime,
+                hintsUsed,
+                skipsUsed,
+                streak,
+                questionHistory,
+                timeBonus,
+                answeredCorrectly
+            };
+            localStorage.setItem('mathChallengeProgress', JSON.stringify(progress));
+            showFeedback('Progress saved!', 'info');
+        }
+
+        function exitGame() {
+            clearInterval(timer);
+            clearInterval(questionTimer);
+            quizSfx.pause();
+            quizSfx.currentTime = 0;
+            pauseMenu.style.display = 'none';
+            startContainer.style.display = 'block';
+            howToPlay.style.display = 'block';
+            isPaused = false;
+            beginBtn.focus();
         }
 
         function nextQuestion() {
@@ -617,21 +1034,49 @@
         function endGame() {
             clearInterval(timer);
             clearInterval(questionTimer);
-            backgroundMusic.pause();
-            backgroundMusic.currentTime = 0;
-            
-            gameContainer.style.display = 'none';
-            resultContainer.style.display = 'block';
-            finalScoreElement.textContent = score;
-            
-            if (score >= 35) { // 7 correct answers * 5 points each
-                resultTitleElement.textContent = 'Congratulations! 🎉';
-                resultMessageElement.textContent = 'You won the game! Great job with your math skills.';
+            quizSfx.pause();
+            quizSfx.currentTime = 0;
+            game.style.display = 'none';
+            results.style.display = 'block';
+            finalScore.textContent = scoreVal;
+            const correctCount = answeredCorrectly.filter(Boolean).length;
+            if (correctCount >= 6) {
+                resultTitle.textContent = 'Victory! 🎉';
+                resultMsg.textContent = 'Congratulations! Your math skills are outstanding!';
                 createConfetti();
+                winSfx.play().catch(e => console.error("Win sound error:", e));
             } else {
-                resultTitleElement.textContent = 'Try Again!';
-                resultMessageElement.textContent = 'You didn\'t reach the required score this time. Keep practicing and try again!';
+                resultTitle.textContent = 'Try Again!';
+                resultMsg.textContent = 'Keep practicing, and you’ll conquer the challenge next time!';
+                loseSfx.play().catch(e => console.error("Lose sound error:", e));
             }
+            localStorage.removeItem('mathChallengeProgress');
+            restartBtn.focus();
+        }
+
+        function showScores() {
+            startContainer.style.display = 'none';
+            results.style.display = 'none';
+            scores.style.display = 'block';
+            howToPlay.style.display = 'block';
+            scoresByLevel = {
+                easy: highScores.filter(score => score.level === 'easy').slice(0, 5),
+                medium: highScores.filter(score => score.level === 'medium').slice(0, 5),
+                hard: highScores.filter(score => score.level === 'hard').slice(0, 5)
+            };
+            let scoresHTML = '';
+            for (const level in scoresByLevel) {
+                scoresHTML += `<li><strong>${level.charAt(0).toUpperCase() + level.slice(1)} Level:</strong></li>`;
+                if (scoresByLevel[level].length > 0) {
+                    scoresHTML += scoresByLevel[level].map((entry, index) => 
+                        `<li aria-label="Rank ${index + 1}: ${entry.score} points">${index + 1}. Anonymous - ${entry.score}</li>`
+                    ).join('');
+                } else {
+                    scoresHTML += '<li>No scores for this level.</li>';
+                }
+            }
+            scoresList.innerHTML = scoresHTML;
+            backBtn.focus();
         }
 
         function createConfetti() {
@@ -643,12 +1088,9 @@
                 confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
                 confetti.style.width = `${Math.random() * 10 + 5}px`;
                 confetti.style.height = confetti.style.width;
+                confetti.setAttribute('aria-hidden', 'true');
                 document.body.appendChild(confetti);
-                
-                // Remove confetti after animation
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
+                setTimeout(() => confetti.remove(), 5000);
             }
         }
 
@@ -657,16 +1099,45 @@
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+            themeBtn.setAttribute('aria-label', document.body.classList.contains('light-theme') ? 'Switch to dark theme' : 'Switch to light theme');
+        }
+
         function restartGame() {
             currentQuestionIndex = 0;
-            score = 0;
-            totalTime = 600;
-            currentScoreElement.textContent = '0';
-            progressBar.style.width = '0%';
-            
-            resultContainer.style.display = 'none';
+            scoreVal = 0;
+            streak = 0;
+            totalTime = gameLevel === 'easy' ? 300 : gameLevel === 'medium' ? 180 : 120;
+            hintsUsed = 0;
+            skipsUsed = 0;
+            timeBonus = 0;
+            questionHistory = [];
+            answeredCorrectly = [];
+            score.textContent = '0';
+            streakCounter.textContent = '0';
+            progress.style.width = '0%';
+            progress.setAttribute('aria-valuenow', '0');
+            qCounter.textContent = '1 of 10';
+            localStorage.removeItem('mathChallengeProgress');
+            results.style.display = 'none';
             startContainer.style.display = 'block';
+            howToPlay.style.display = 'block';
+            beginBtn.focus();
         }
+
+        // Load saved theme and scores
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            themeBtn.setAttribute('aria-label', 'Switch to dark theme');
+        }
+        highScores = JSON.parse(localStorage.getItem('scores')) || [];
+
+        // Focus management
+        document.addEventListener('DOMContentLoaded', () => {
+            beginBtn.focus();
+        });
     </script>
 </body>
 </html>
